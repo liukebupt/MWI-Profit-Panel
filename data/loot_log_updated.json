@@ -1,0 +1,314 @@
+{
+  "type": "loot_log_updated",
+  "lootLog": [
+    {
+      "startTime": "2025-06-14T12:53:02.357441733Z",
+      "endTime": "2025-06-14T14:15:34.819260484Z",
+      "characterActionId": 93450392,
+      "actionHrid": "/actions/brewing/artisan_tea",
+      "primaryItemHash": "",
+      "secondaryItemHash": "",
+      "actionCount": 1000,
+      "partyId": 0,
+      "drops": {
+        "/items/artisan_tea::0": 1123,
+        "/items/brewing_essence::0": 79,
+        "/items/medium_artisans_crate::0": 1
+      }
+    },
+    {
+      "startTime": "2025-06-14T14:15:34.840272951Z",
+      "endTime": "2025-06-15T04:53:24.911255509Z",
+      "characterActionId": 93451319,
+      "actionHrid": "/actions/cooking/star_fruit_yogurt",
+      "primaryItemHash": "",
+      "secondaryItemHash": "",
+      "actionCount": 14036,
+      "partyId": 0,
+      "drops": {
+        "/items/cooking_essence::0": 838,
+        "/items/large_artisans_crate::0": 5,
+        "/items/star_fruit_yogurt::0": 15689
+      }
+    },
+    {
+      "startTime": "2025-06-15T04:53:29.200034618Z",
+      "endTime": "2025-06-15T08:33:16.915249531Z",
+      "characterActionId": 93863085,
+      "actionHrid": "/actions/foraging/olympus_mons",
+      "primaryItemHash": "",
+      "secondaryItemHash": "",
+      "actionCount": 1881,
+      "partyId": 0,
+      "drops": {
+        "/items/dragon_fruit::0": 2723,
+        "/items/fieriosa_coffee_bean::0": 1060,
+        "/items/foraging_essence::0": 174,
+        "/items/marsberry::0": 4952,
+        "/items/medium_meteorite_cache::0": 1
+      }
+    },
+    {
+      "startTime": "2025-06-15T08:33:19.698820756Z",
+      "endTime": "2025-06-15T08:34:53.462252537Z",
+      "characterActionId": 93970732,
+      "actionHrid": "/actions/cooking/cupcake",
+      "primaryItemHash": "",
+      "secondaryItemHash": "",
+      "actionCount": 76,
+      "partyId": 0,
+      "drops": {
+        "/items/cupcake::0": 83
+      }
+    },
+    {
+      "startTime": "2025-06-15T08:34:53.48292181Z",
+      "endTime": "2025-06-15T08:39:37.490311722Z",
+      "characterActionId": 93970823,
+      "actionHrid": "/actions/woodcutting/tree",
+      "primaryItemHash": "",
+      "secondaryItemHash": "",
+      "actionCount": 169,
+      "partyId": 0,
+      "drops": {
+        "/items/log::0": 479,
+        "/items/woodcutting_essence::0": 9
+      }
+    },
+    {
+      "startTime": "2025-06-15T08:39:37.512730082Z",
+      "endTime": "2025-06-15T12:53:42.862814901Z",
+      "characterActionId": 93970921,
+      "actionHrid": "/actions/foraging/olympus_mons",
+      "primaryItemHash": "",
+      "secondaryItemHash": "",
+      "actionCount": 2225,
+      "partyId": 0,
+      "drops": {
+        "/items/dragon_fruit::0": 3128,
+        "/items/fieriosa_coffee_bean::0": 1278,
+        "/items/foraging_essence::0": 171,
+        "/items/marsberry::0": 5555,
+        "/items/medium_meteorite_cache::0": 2
+      }
+    },
+    {
+      "startTime": "2025-06-15T12:53:51.845188985Z",
+      "endTime": "2025-06-15T15:04:45.151864224Z",
+      "characterActionId": 94094983,
+      "actionHrid": "/actions/brewing/efficiency_tea",
+      "primaryItemHash": "",
+      "secondaryItemHash": "",
+      "actionCount": 2000,
+      "partyId": 0,
+      "drops": {
+        "/items/brewing_essence::0": 128,
+        "/items/efficiency_tea::0": 2252
+      }
+    },
+    {
+      "startTime": "2025-06-15T15:04:45.174098112Z",
+      "endTime": "2025-06-15T16:22:23.486077008Z",
+      "characterActionId": 94095142,
+      "actionHrid": "/actions/brewing/artisan_tea",
+      "primaryItemHash": "",
+      "secondaryItemHash": "",
+      "actionCount": 1000,
+      "partyId": 0,
+      "drops": {
+        "/items/artisan_tea::0": 1125,
+        "/items/brewing_essence::0": 81
+      }
+    },
+    {
+      "startTime": "2025-06-15T16:22:23.504089103Z",
+      "endTime": "2025-06-15T17:43:17.722604848Z",
+      "characterActionId": 94190248,
+      "actionHrid": "/actions/brewing/gourmet_tea",
+      "primaryItemHash": "",
+      "secondaryItemHash": "",
+      "actionCount": 2425,
+      "partyId": 0,
+      "drops": {
+        "/items/brewing_essence::0": 67,
+        "/items/gourmet_tea::0": 2726
+      }
+    },
+    {
+      "startTime": "2025-06-15T17:43:17.753386047Z",
+      "endTime": "2025-06-16T01:30:00.780300717Z",
+      "characterActionId": 94095568,
+      "actionHrid": "/actions/foraging/olympus_mons",
+      "primaryItemHash": "",
+      "secondaryItemHash": "",
+      "actionCount": 4103,
+      "partyId": 0,
+      "drops": {
+        "/items/dragon_fruit::0": 6093,
+        "/items/fieriosa_coffee_bean::0": 2446,
+        "/items/foraging_essence::0": 373,
+        "/items/marsberry::0": 10644,
+        "/items/medium_meteorite_cache::0": 1
+      }
+    },
+    {
+      "startTime": "2025-06-16T01:30:04.094555474Z",
+      "endTime": "2025-06-16T02:22:40.403978117Z",
+      "characterActionId": 94378024,
+      "actionHrid": "/actions/foraging/asteroid_belt",
+      "primaryItemHash": "",
+      "secondaryItemHash": "",
+      "actionCount": 276,
+      "partyId": 0,
+      "drops": {
+        "/items/foraging_essence::0": 41,
+        "/items/radiant_fabric::0": 15,
+        "/items/radiant_fiber::0": 209,
+        "/items/spaceberry::0": 450,
+        "/items/spacia_coffee_bean::0": 119,
+        "/items/star_fruit::0": 323
+      }
+    },
+    {
+      "startTime": "2025-06-16T02:22:45.926769143Z",
+      "endTime": "2025-06-16T03:23:51.561632902Z",
+      "characterActionId": 94405490,
+      "actionHrid": "/actions/foraging/radiant_fiber",
+      "primaryItemHash": "",
+      "secondaryItemHash": "",
+      "actionCount": 323,
+      "partyId": 0,
+      "drops": {
+        "/items/foraging_essence::0": 41,
+        "/items/radiant_fabric::0": 65,
+        "/items/radiant_fiber::0": 796
+      }
+    },
+    {
+      "startTime": "2025-06-16T03:23:52.714848842Z",
+      "endTime": "2025-06-16T04:24:44.185020617Z",
+      "characterActionId": 94435802,
+      "actionHrid": "/actions/foraging/radiant_fiber",
+      "primaryItemHash": "",
+      "secondaryItemHash": "",
+      "actionCount": 318,
+      "partyId": 0,
+      "drops": {
+        "/items/foraging_essence::0": 41,
+        "/items/radiant_fabric::0": 63,
+        "/items/radiant_fiber::0": 765
+      }
+    },
+    {
+      "startTime": "2025-06-16T04:24:44.27005237Z",
+      "endTime": "2025-06-16T05:24:49.168815195Z",
+      "characterActionId": 94435842,
+      "actionHrid": "/actions/foraging/radiant_fiber",
+      "primaryItemHash": "",
+      "secondaryItemHash": "",
+      "actionCount": 318,
+      "partyId": 0,
+      "drops": {
+        "/items/foraging_essence::0": 52,
+        "/items/radiant_fabric::0": 64,
+        "/items/radiant_fiber::0": 807
+      }
+    },
+    {
+      "startTime": "2025-06-16T05:24:49.200369817Z",
+      "endTime": "2025-06-16T11:21:20.868659788Z",
+      "characterActionId": 94435873,
+      "actionHrid": "/actions/foraging/asteroid_belt",
+      "primaryItemHash": "",
+      "secondaryItemHash": "",
+      "actionCount": 1895,
+      "partyId": 0,
+      "drops": {
+        "/items/foraging_essence::0": 289,
+        "/items/radiant_fabric::0": 112,
+        "/items/radiant_fiber::0": 1511,
+        "/items/spaceberry::0": 3485,
+        "/items/spacia_coffee_bean::0": 837,
+        "/items/star_fruit::0": 2004
+      }
+    },
+    {
+      "startTime": "2025-06-16T11:21:27.586853932Z",
+      "endTime": "2025-06-16T12:19:32.476809378Z",
+      "characterActionId": 94654577,
+      "actionHrid": "/actions/foraging/radiant_fiber",
+      "primaryItemHash": "",
+      "secondaryItemHash": "",
+      "actionCount": 320,
+      "partyId": 0,
+      "drops": {
+        "/items/foraging_essence::0": 62,
+        "/items/radiant_fabric::0": 69,
+        "/items/radiant_fiber::0": 763
+      }
+    },
+    {
+      "startTime": "2025-06-16T12:19:32.507371981Z",
+      "endTime": "2025-06-16T13:18:38.174800961Z",
+      "characterActionId": 94654612,
+      "actionHrid": "/actions/foraging/radiant_fiber",
+      "primaryItemHash": "",
+      "secondaryItemHash": "",
+      "actionCount": 320,
+      "partyId": 0,
+      "drops": {
+        "/items/foraging_essence::0": 53,
+        "/items/radiant_fabric::0": 56,
+        "/items/radiant_fiber::0": 817
+      }
+    },
+    {
+      "startTime": "2025-06-16T13:18:38.226750044Z",
+      "endTime": "2025-06-16T14:17:58.366819928Z",
+      "characterActionId": 94701737,
+      "actionHrid": "/actions/foraging/radiant_fiber",
+      "primaryItemHash": "",
+      "secondaryItemHash": "",
+      "actionCount": 320,
+      "partyId": 0,
+      "drops": {
+        "/items/foraging_essence::0": 53,
+        "/items/radiant_fabric::0": 70,
+        "/items/radiant_fiber::0": 792
+      }
+    },
+    {
+      "startTime": "2025-06-16T14:17:58.386124655Z",
+      "endTime": "2025-06-16T15:17:33.034023168Z",
+      "characterActionId": 94714455,
+      "actionHrid": "/actions/foraging/radiant_fiber",
+      "primaryItemHash": "",
+      "secondaryItemHash": "",
+      "actionCount": 320,
+      "partyId": 0,
+      "drops": {
+        "/items/foraging_essence::0": 61,
+        "/items/radiant_fabric::0": 81,
+        "/items/radiant_fiber::0": 772
+      }
+    },
+    {
+      "startTime": "2025-06-16T15:17:33.053175787Z",
+      "endTime": "2025-06-16T15:30:15.826681764Z",
+      "characterActionId": 94654632,
+      "actionHrid": "/actions/foraging/asteroid_belt",
+      "primaryItemHash": "",
+      "secondaryItemHash": "",
+      "actionCount": 64,
+      "partyId": 0,
+      "drops": {
+        "/items/foraging_essence::0": 13,
+        "/items/radiant_fabric::0": 5,
+        "/items/radiant_fiber::0": 58,
+        "/items/spaceberry::0": 118,
+        "/items/spacia_coffee_bean::0": 18,
+        "/items/star_fruit::0": 68
+      }
+    }
+  ]
+}
