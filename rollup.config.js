@@ -6,7 +6,7 @@ import fs from 'fs';
 let last = Date.now();
 const isDev = process.env.NODE_ENV === 'development';
 
-const version = "2025.06.16";
+const version = "2025.06.18";
 
 function updateBanner() {
     if (Date.now() - last > 1000) last = Date.now();
@@ -43,8 +43,8 @@ const prodBanner = `// ==UserScript==
 // @grant        GM_xmlhttpRequest
 // @connect      raw.githubusercontent.com
 // @connect      ghproxy.net
-// @downloadURL  https://update.greasyfork.org/scripts/536724/MWI%20Profit%20Panel.user.js
-// @updateURL    https://update.greasyfork.org/scripts/536724/MWI%20Profit%20Panel.meta.js
+// @downloadURL  https://update.greasyfork.cc/scripts/536724/MWI%20Profit%20Panel.user.js
+// @updateURL    https://update.greasyfork.cc/scripts/536724/MWI%20Profit%20Panel.meta.js
 // @license      MIT
 // ==/UserScript==`;
 

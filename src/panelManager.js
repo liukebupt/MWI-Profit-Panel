@@ -3,26 +3,33 @@ import { GenerateDom } from './domGenerator.js';
 import { createTooltip } from './tooltipManager.js';
 import { formatDuration, getMwiObj, getDuration, mooketStatus } from './utils.js';
 
-export async function waitForRightPannel() {
+export async function waitForPannels() {
     if (!globals.freshnessMarketJson?.market) {
-        setTimeout(waitForRightPannel, 1000);
+        setTimeout(waitForPannels, 1000);
         return;
     }
 
-    const targetNodes = document.querySelectorAll("div.CharacterManagement_tabsComponentContainer__3oI5G");
+    const rightPanelContainers = document.querySelectorAll("div.CharacterManagement_tabsComponentContainer__3oI5G");
+    const leftPanelContainers = document.querySelectorAll("div.GamePage_middlePanel__ubts7 .MuiTabs-root");
+    const targetNodes = [...rightPanelContainers, ...leftPanelContainers];
     targetNodes.forEach(container => {
         if (container.dataset.processed) return;
 
-        // 添加收益标签按钮
+        // 添加标签按钮和面板容器
         const tabsContainer = container.querySelector('div.MuiTabs-flexContainer');
+        const tabPanelsContainer =
+            container.querySelector('div.TabsComponent_tabPanelsContainer__26mzo') ||
+            container.querySelector('div.MuiTabPanel-root');
+
+        if (!tabsContainer || !tabPanelsContainer) return;
+
         const newTabButton = document.createElement('button');
-        newTabButton.className = 'MuiButtonBase-root MuiTab-root MuiTab-textColorPrimary css-1q2h7u5';
+        newTabButton.className = 'MuiButtonBase-root MuiTab-root MuiTab-textColorPrimary css-1q2h7u5 income-tab';
         newTabButton.innerHTML = `<span class="MuiBadge-root TabsComponent_badge__1Du26 css-1rzb3uu">收益<span class="MuiBadge-badge MuiBadge-standard MuiBadge-invisible MuiBadge-anchorOriginTopRight MuiBadge-anchorOriginTopRightRectangular MuiBadge-overlapRectangular MuiBadge-colorWarning css-dpce5z"></span></span><span class="MuiTouchRipple-root css-w0pj6f"></span>`;
         newTabButton.classList.add('income-tab');
         tabsContainer.appendChild(newTabButton);
 
         // 创建收益面板
-        const tabPanelsContainer = container.querySelector('div.TabsComponent_tabPanelsContainer__26mzo');
         const newPanel = document.createElement('div');
         newPanel.className = 'TabPanel_tabPanel__tXMJF TabPanel_hidden__26UM3 income-panel';
         newPanel.innerHTML = `
@@ -46,9 +53,9 @@ export async function waitForRightPannel() {
     });
 
     // Check if income panel is missing
-    const incomePanelMissing = document.querySelectorAll(".TabPanel_tabPanel__tXMJF.TabPanel_hidden__26UM3.income-panel").length === 0;
-    if (incomePanelMissing) {
-        setTimeout(waitForRightPannel, 1000);
+    const panelsExist = document.querySelectorAll(".income-panel").length >= 2;
+    if (!panelsExist) {
+        setTimeout(waitForPannels, 1000);
     }
 }
 
@@ -62,14 +69,16 @@ function setupTabSwitching(newTabButton, newPanel, tabPanelsContainer, container
         newPanel.classList.remove('TabPanel_hidden__26UM3');
     });
 
-    container.querySelectorAll('.MuiTab-root:not(:last-child)').forEach(btn => {
+    container.querySelectorAll('.MuiTab-root:not(.income-tab)').forEach(btn => {
         btn.addEventListener('click', () => {
             newPanel.classList.add('TabPanel_hidden__26UM3');
             newTabButton.classList.remove('Mui-selected');
 
             // 添加选中状态并显示原标签面板
             btn.classList.add('Mui-selected');
-            const tabIndex = Array.from(container.querySelectorAll('.MuiTab-root:not(:last-child)')).indexOf(btn);
+            const tabIndex = Array.from(btn.parentNode.children)
+                .filter(el => !el.classList.contains('income-tab'))
+                .indexOf(btn);
             tabPanelsContainer.querySelectorAll('.TabPanel_tabPanel__tXMJF:not(.income-panel)').forEach((panel, index) => {
                 panel.classList.toggle('TabPanel_hidden__26UM3', index !== tabIndex);
             });

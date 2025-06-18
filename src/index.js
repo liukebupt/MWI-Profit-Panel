@@ -1,6 +1,6 @@
 import globals from './globals'
 import { preFetchData } from './marketService';
-import { waitForRightPannel, refreshProfitPanel } from './panelManager'
+import { waitForPannels, refreshProfitPanel } from './panelManager'
 import { processingCategory } from './utils';
 import LostTrackerExpectEstimate from './LostTrackerExpectEstimate'
 
@@ -39,7 +39,7 @@ function handleMessage(message) {
             globals.initCharacterData_consumableActionTypeBuffsMap = obj.consumableActionTypeBuffsMap;
             globals.initCharacterData_houseActionTypeBuffsMap = obj.houseActionTypeBuffsMap;
             globals.initCharacterData_equipmentActionTypeBuffsMap = obj.equipmentActionTypeBuffsMap;
-            waitForRightPannel();
+            waitForPannels();
         }
         else if (obj && obj.type === "init_client_data") {
             globals.initClientData_actionDetailMap = obj.actionDetailMap;

@@ -96,12 +96,19 @@ export function getSvg(iconId) {
 
 export function formatNumber(val) {
     let number = Number(val);
-    if (number < 10) return Number(Math.trunc(number * 1000) / 1000);
-    else if (number < 1000) return Number(Math.trunc(number * 10) / 10);
-    else if (number < 1e5) return Math.trunc(number);
-    else if (number < 1e6) return `${Number(Math.trunc(number / 100) / 10)}k`;
-    else if (number < 1e9) return `${Number(Math.trunc(number / 1e4) / 100)}M`;
+    const abs = Math.abs(number);
+    if (abs < 10) return Number(Math.trunc(number * 1000) / 1000);
+    else if (abs < 1000) return Number(Math.trunc(number * 10) / 10);
+    else if (abs < 1e5) return Math.trunc(number);
+    else if (abs < 1e6) return `${Number(Math.trunc(number / 100) / 10)}k`;
+    else if (abs < 1e9) return `${Number(Math.trunc(number / 1e4) / 100)}M`;
     else return `${Math.trunc(number / 1e9)}B`;
+}
+
+export function getSign(val) {
+    if (val > 0) return '↑';
+    else if (val < 0) return '↓';
+    return '';
 }
 
 export function getDuration(date) {

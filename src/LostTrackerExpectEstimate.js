@@ -1,6 +1,6 @@
 import globals from "./globals";
 import ProfitCaculation from "./profitCalculation";
-import { getItemValuation, formatNumber } from "./utils";
+import { getItemValuation, formatNumber, getSign } from "./utils";
 
 const supportActionType = [
     "/action_types/milking",
@@ -21,6 +21,7 @@ export default function LostTrackerExpectEstimate() {
         const lootLogList = document.querySelectorAll('.LootLogPanel_actionLoots__3oTid .LootLogPanel_actionLoot__32gl_');
         if (!lootLogList.length || !Array.isArray(globals.lootLog)) return;
 
+        let totalDuration = 0, totalProfit = 0, totalExcessProfit = 0, totalExpectedProfit = 0;
         const lootLogData = [...globals.lootLog].reverse();
         lootLogList.forEach((lootElem, idx) => {
             const logData = lootLogData[idx];
@@ -35,13 +36,13 @@ export default function LostTrackerExpectEstimate() {
             const expected = ProfitCaculation(action, globals.medianMarketJson);
 
             // 计算实际收益
-            let actualValue = 0;
+            let actualIncome = 0;
             Object.entries(logData.drops).forEach(([itemHash, count]) => {
                 const itemHrid = itemHash.split("::")[0];
                 const valuation = getItemValuation(itemHrid, globals.medianMarketJson);
-                actualValue += (valuation?.bid || 0) * count;
+                actualIncome += (valuation?.bid || 0) * count;
             });
-            actualValue *= 0.98;
+            actualIncome *= 0.98;
 
             // 计算持续时间（小时）
             const startTime = new Date(logData.startTime);
@@ -49,20 +50,25 @@ export default function LostTrackerExpectEstimate() {
             const durationHours = (endTime - startTime) / (1000 * 60 * 60);
 
             // 计算预期收益
-            const expectedValue = expected.outputPerHour.bid * durationHours;
-            const expendValue = expected.expendPerHour * durationHours;
-            const profit = actualValue - expendValue;
-            const diffValue = actualValue - expectedValue;
-            const diffPercent = (diffValue / expectedValue * 100).toFixed(2);
+            const expectedIncome = expected.outputPerHour.bid * durationHours;
+            const outcome = expected.expendPerHour * durationHours;
+            const profit = actualIncome - outcome;
+            const expectedProfit = expectedIncome - outcome;
+            const excessProfit = actualIncome - expectedIncome;
+            const excessPercent = (excessProfit / expectedProfit * 100).toFixed(2);
+
+            totalDuration += endTime - startTime;
+            totalProfit += profit;
+            totalExcessProfit += excessProfit;
+            totalExpectedProfit += expectedProfit;
 
             // 生成显示元素
 
-            const content = diffPercent >= 0 ?
-                `支出 ${formatNumber(expendValue)} 收入 ${formatNumber(actualValue)} 高于预期 ${Math.abs(diffPercent)}% 期望 ${formatNumber(expectedValue)} 多赚 ${formatNumber(Math.abs(diffValue))} 盈利 ${formatNumber(profit)}` :
-                `支出 ${formatNumber(expendValue)} 收入 ${formatNumber(actualValue)} 低于预期 ${Math.abs(diffPercent)}% 期望 ${formatNumber(expectedValue)} 少赚 ${formatNumber(Math.abs(diffValue))} 盈利 ${formatNumber(profit)}`;
+            const sign = getSign(excessProfit);
+            const content = `支出: ${formatNumber(outcome)} 预期收入: ${formatNumber(expectedIncome)} 实际收入: ${formatNumber(actualIncome)} (${sign}${Math.abs(excessPercent)}%) 盈利: ${formatNumber(profit)}`;
 
-            const colorIntensity = Math.min(Math.abs(diffPercent) / 20, 1) * 0.3 + 0.7;
-            const color = diffPercent >= 0
+            const colorIntensity = Math.min(Math.abs(excessPercent) / 20, 1) * 0.3 + 0.7;
+            const color = excessProfit >= 0
                 ? `rgb(${Math.floor(255 * colorIntensity)}, 0, 0)`  // 红色表示高于预期
                 : `rgb(0, ${Math.floor(255 * colorIntensity)}, 0)`; // 绿色表示低于预期
             const span = document.createElement('span');
@@ -76,5 +82,23 @@ export default function LostTrackerExpectEstimate() {
                 actionNameSpan.appendChild(span);
             }
         });
+
+        totalDuration /= 24 * 60 * 60 * 1000;
+        const excessPercent = (totalExcessProfit / totalExpectedProfit * 100).toFixed(2);
+        const content = `统计时长：${totalDuration.toFixed(2)}天 净利润: ${formatNumber(totalProfit)} (${formatNumber(totalProfit / totalDuration)}/天) 较预期: ${formatNumber(totalExcessProfit / totalDuration)}/天 (${excessPercent}%)`;
+        const colorIntensity = Math.min(Math.abs(excessPercent) / 20, 1) * 0.2 + 0.8;
+        const color = excessPercent >= 0
+            ? `rgb(${Math.floor(255 * colorIntensity)}, 0, 0)`  // 红色表示高于预期
+            : `rgb(0, ${Math.floor(255 * colorIntensity)}, 0)`; // 绿色表示低于预期
+        const summarySpan = document.createElement('span');
+        summarySpan.style.marginLeft = '8px';
+        summarySpan.style.color = color;
+        summarySpan.textContent = content;
+
+        // 添加到顶部按钮行
+        const buttonContainer = document.querySelector('.LootLogPanel_lootLogPanel__2013X div');
+        if (buttonContainer) {
+            buttonContainer.appendChild(summarySpan);
+        }
     }, 200);
 }
