@@ -1,4 +1,4 @@
-import { getItemName, } from './utils.js';
+import { formatNumber, getDuration, getItemName, getMwiObj, TimeSpan, ZHitemNames, } from './utils.js';
 import globals from './globals.js';
 
 const freshnessConfig = {
@@ -53,44 +53,234 @@ class MWIApiMarketJson {
 }
 
 class MooketMarketJson {
+    constructor(parentData, cb) {
+        this.mwi = getMwiObj();
+        this.parentMarket = parentData;
+        this.refreshInterval = globals.profitSettings.refreshInterval;
+        this.updating = false;
+        this.updateCallback = cb;
+        this.lastFetch = {};
+        this.loadCache();
 
-}
-
-class UnifyMarketJson {
-    constructor() {
-        this.mwiApi = new MWIApiMarketJson(freshnessConfig);
-        this.official = new MWIApiMarketJson(officialConfig);
-        this.mooket = new MooketMarketJson();
-
-        this.mergeMarket = new Proxy(this, {
-            get(target, prop) {
-
-            },
-            set() { return true; }
+        globals.subscribe((k, profitSettings) => {
+            if (k === "profitSettings") {
+                this.refreshInterval = profitSettings.refreshInterval;
+            }
         });
-
-        return new Proxy(this, {
-            get(target, prop) {
-                if (prop == 'time') {
-                    if (target.mwiApi?.time && target.official?.time) return Math.max(target.mwiApi.time, target.official.time);
-                    return target.mwiApi?.time || target.official?.time;
-                }
-                if (prop == 'market') {
-                    return target.mergeMarket;
-                }
-                return null;
-            },
-            set() { return true; }
+        this.refreshTimer = setInterval(() => this.updatePrice(), TimeSpan.TEN_SECONDS);
+        addEventListener('MWICoreItemPriceUpdated', (e) => {
+            console.log({ detail: e.detail });
+            this.updatePrice()
         });
     }
 
-    getItemByName(itemName) {
-        
+    loadCache() {
+        const cacheLastFetch = JSON.parse(GM_getValue('MooketLastFetch', '{}'));
+        Object.assign(this.lastFetch, cacheLastFetch);
+    }
+
+    dumpCache() {
+        GM_setValue('MooketLastFetch', JSON.stringify(this.lastFetch));
+    }
+
+    async updatePrice() {
+        if (this.updating) return;
+        if (!this.mwi || !this.mwi.coreMarket) this.mwi = getMwiObj();
+        if (!this.mwi || !this.mwi.coreMarket) return;
+
+        this.updating = true;
+        const refreshAtLeast = (Date.now() - this.refreshInterval) / 1000;
+        const denyAheadTime = (Date.now() + TimeSpan.FIVE_MINUTES) / 1000;
+        const updateItems = [];
+        for (const [name, item] of Object.entries(this.parentMarket)) {
+            if (item?.time && item.time > refreshAtLeast) continue;
+
+            const price = this.mwi.coreMarket.getItemPrice(name, 0, true);
+            if (price?.time && price?.time > refreshAtLeast) {
+                if (item?.time && price.time > item.time && price.time < denyAheadTime) {
+                    updateItems.push({ name, ...price });
+                }
+                continue;
+            }
+            if (this.lastFetch[name] > refreshAtLeast) continue;
+
+            const refreshedPrice = this.mwi.coreMarket.getItemPrice(name);
+            this.lastFetch[name] = Date.now() / 1000;
+            if (refreshedPrice?.time > denyAheadTime) continue;
+            updateItems.push({ name, ...refreshedPrice });
+        }
+        if (updateItems.length > 0) {
+            console.log(updateItems);
+            this.updateCallback(updateItems);
+            this.dumpCache();
+        }
+        this.updating = false;
+    }
+}
+
+const DataSourceKey = {
+    MwiApi: "MwiApi",
+    Official: "Official",
+    Mooket: "Mooket",
+    User: "User",
+    init: "init",
+};
+class UnifyMarketData {
+    constructor(itemDetailMap) {
+        this.market = {};
+        this.name2Hrid = {};
+        this.statMap = {
+            src: {},
+            oldestItem: {},
+            newestItem: {},
+        };
+        this.time = Date.now() / 1000;
+        this.initMarketData(itemDetailMap);
+
+        addEventListener(freshnessConfig.cacheKey, (e) => this.updateDataFromMwiApi(e.detail));
+        addEventListener(officialConfig.cacheKey, (e) => this.updateDataFromOfficial(e.detail));
+        this.freshnessMarketJson = new MWIApiMarketJson(freshnessConfig);
+        this.officialMarketJson = new MWIApiMarketJson(officialConfig);
+        this.mooket = new MooketMarketJson(this.market, items => this.partialUpdateFromMooket(items));
+    }
+
+    initMarketData(itemDetailMap) {
+        for (const [hrid, item] of Object.entries(itemDetailMap)) {
+            if (item?.isTradable) {
+                this.market[item.name] = {
+                    ask: item.sellPrice,
+                    bid: item.sellPrice,
+                    time: 0,
+                    src: 'init',
+                };
+                this.name2Hrid[item.name] = hrid;
+            }
+        }
+        this.mergeFromCache();
+
+        this.postUpdate();
+    }
+
+    updateDataFromMwiApi(marketJson) {
+        const time = marketJson.time;
+        for (const [name, item] of Object.entries(this.market)) {
+            if (item.time > time) continue;
+            const newPrice = marketJson?.market[name];
+            if (!newPrice) continue;
+            Object.assign(item, { ...newPrice, time, src: DataSourceKey.MwiApi });
+        }
+        this.postUpdate();
+    }
+
+    updateDataFromOfficial(marketJson) {
+        const time = marketJson.time;
+        for (const [name, item] of Object.entries(this.market)) {
+            if (item.time > time) continue;
+            const hrid = this.name2Hrid[name];
+            const newPrice = marketJson?.market[hrid];
+            if (!newPrice || !newPrice["0"]) continue;
+            const level0 = newPrice["0"];
+            Object.assign(item, {
+                ask: level0.a,
+                bid: level0.b,
+                src: DataSourceKey.Official,
+                time
+            });
+        }
+        this.postUpdate();
+    }
+
+    partialUpdateFromMooket(items) {
+        items.forEach(item => {
+            const targetItem = this.market[item.name];
+            Object.assign(targetItem, {
+                ask: item.ask,
+                bid: item.bid,
+                src: DataSourceKey.Mooket,
+                time: item.time,
+            });
+        });
+        this.postUpdate();
+    }
+
+    updateDataFromMarket(marketItemOrderBooks) {
+        const itemHrid = marketItemOrderBooks?.itemHrid;
+        if (itemHrid) {
+            const item = globals.initClientData_itemDetailMap[itemHrid];
+            const orderBook = marketItemOrderBooks?.orderBooks[0];
+            const ask = orderBook?.asks?.length > 0 ? orderBook.asks[0].price : item.sellPrice;
+            const bid = orderBook?.bids?.length > 0 ? orderBook.bids[0].price : item.sellPrice;
+            const targetItem = this.market[item.name];
+            Object.assign(targetItem, {
+                ask,
+                bid,
+                src: DataSourceKey.User,
+                time: Date.now() / 1000,
+            });
+        }
+    }
+
+    postUpdate() {
+        const newStas = {};
+        let oldestItem = {
+            name: "",
+            time: Date.now() / 1000,
+        }
+        let newestItem = {
+            name: "",
+            time: 0,
+        }
+        let total = 0;
+        for (const [name, item] of Object.entries(this.market)) {
+            if (!newStas[item.src]) newStas[item.src] = 0;
+            newStas[item.src]++;
+            if (item.time < oldestItem.time) oldestItem = {
+                name,
+                time: item.time,
+            }
+            if (item.time > newestItem.time) newestItem = {
+                name,
+                time: item.time,
+            }
+            ++total;
+        }
+        this.time = oldestItem.time;
+        Object.assign(this.statMap, { src: { ...newStas, total }, oldestItem, newestItem });
+
+        this.dumpToCache();
+        globals.hasMarketItemUpdate = true;
+    }
+
+    mergeFromCache() {
+        const cacheMarket = JSON.parse(GM_getValue('UnifyMarketData', '{}'));
+        for (const [name, item] of Object.entries(this.market)) {
+            const cacheItem = cacheMarket[name];
+            if (cacheItem) {
+                Object.assign(item, cacheItem);
+            }
+        }
+    }
+
+    dumpToCache() {
+        GM_setValue('UnifyMarketData', JSON.stringify(this.market));
+    }
+
+    stat() {
+        let dataSrcArr = [];
+        if (this.statMap.src[DataSourceKey.Mooket]) dataSrcArr.push(`${DataSourceKey.Mooket} (${formatNumber(this.statMap.src[DataSourceKey.Mooket] * 100 / this.statMap.src.total)}%)`);
+        if (this.statMap.src[DataSourceKey.User]) dataSrcArr.push(`${DataSourceKey.User} (${formatNumber(this.statMap.src[DataSourceKey.User] * 100 / this.statMap.src.total)}%)`);
+        if (this.statMap.src[DataSourceKey.MwiApi]) dataSrcArr.push(`${DataSourceKey.MwiApi} (${formatNumber(this.statMap.src[DataSourceKey.MwiApi] * 100 / this.statMap.src.total)}%)`);
+        if (this.statMap.src[DataSourceKey.Official]) dataSrcArr.push(`${DataSourceKey.Official} (${formatNumber(this.statMap.src[DataSourceKey.Official] * 100 / this.statMap.src.total)}%)`);
+
+        const oldestStr = `${globals.en2ZhMap[this.statMap.oldestItem.name]}(${getDuration(new Date(this.statMap.oldestItem.time * 1000))})`;
+        const newestStr = `${globals.en2ZhMap[this.statMap.newestItem.name]}(${getDuration(new Date(this.statMap.newestItem.time * 1000))})`;
+
+        return `最旧：${oldestStr} 数据来源：[${dataSrcArr.join(',')}]`;
     }
 }
 
 export async function preFetchData() {
-    globals.freshnessMarketJson = new MWIApiMarketJson(freshnessConfig);
+    globals.freshnessMarketJson = new UnifyMarketData(globals.initClientData_itemDetailMap);
     globals.medianMarketJson = new MWIApiMarketJson(medianConfig);
 };
 
@@ -133,6 +323,7 @@ export async function FetchMarketJson(config) {
             // 如果数据未过期（1小时内）或 缓存足够新（5分钟内）
             if (dataAge < ONE_HOUR || cacheAge < FIVE_MINUTES) {
                 schedualNextRefresh({ data, timestamp, config });
+                dispatchEvent(new CustomEvent(config.cacheKey, { detail: data }));
                 return data;
             }
         } catch (e) {
@@ -151,6 +342,7 @@ export async function FetchMarketJson(config) {
                 if (cachedData) {
                     try {
                         const { data } = JSON.parse(cachedData);
+
                         resolve(data);
                     } catch (e) {
                         resolve(null);
@@ -168,7 +360,7 @@ export async function FetchMarketJson(config) {
                     onload: function (response) {
                         try {
                             let data = JSON.parse(response.responseText);
-                            if (config.dataTransfer) data = config.dataTransfer(data);
+                            if (config.dataTransfer) config.dataTransfer(data);
                             if (!data?.market) {
                                 throw new Error('Invalid market data structure');
                             }
@@ -202,95 +394,7 @@ export async function FetchMarketJson(config) {
         tryNextUrl();
     }).then(data => {
         schedualNextRefresh({ data, timestamp: Date.now(), config });
+        dispatchEvent(new CustomEvent(config.cacheKey, { detail: data }));
         return data;
     });
-}
-
-export function getItemValuation(hrid, marketJson, mwiObj = null) {
-    const item = globals.initClientData_itemDetailMap[hrid];
-    if (!item) {
-        console.warn(`Item not found: ${hrid}`);
-        return { bid: 0, ask: 0, medianBid: 0, medianAsk: 0 };
-    }
-
-    if (item?.isTradable) {
-        let ret = marketJson.market[item.name];
-        if (!ret) {
-            console.warn(`Market data not found for item: ${item.name}`);
-            return { bid: 0, ask: 0, medianBid: 0, medianAsk: 0 };
-        }
-
-        // 合并mooket市场数据
-        if (mwiObj?.coreMarket) {
-            const hridWithLevel = `${hrid}:0`;
-            const mooketVal = mwiObj.coreMarket.marketData[hridWithLevel];
-            if (mooketVal && mooketVal?.time > marketJson.time) {
-                ret.bid = mooketVal.bid;
-                ret.ask = mooketVal.ask;
-            }
-        }
-
-        if (ret.bid == -1 && ret.ask == -1) ret.ask = ret.bid = 1e9;
-        else if (ret.bid == -1 || ret.ask == -1) ret.ask = ret.bid = Math.max(ret.ask, ret.bid);
-
-        return {
-            ...ret,
-            medianBid: ret.medianBid || 0,
-            medianAsk: ret.medianAsk || 0
-        };
-    }
-
-    if (item?.isOpenable) {
-        const openedItems = globals.initClientData_openableLootDropMap[hrid];
-        if (!openedItems) {
-            console.warn(`Openable items not found for: ${hrid}`);
-            return { bid: 0, ask: 0, medianBid: 0, medianAsk: 0 };
-        }
-
-        const valuation = { bid: 0, ask: 0, medianBid: 0, medianAsk: 0 };
-        for (const openedItem of openedItems) {
-            const openedValuation = getItemValuation(openedItem.itemHrid, marketJson, mwiObj);
-            const avgCount = (openedItem.minCount + openedItem.maxCount) / 2;
-            valuation.bid += openedItem.dropRate * avgCount * openedValuation.bid;
-            valuation.ask += openedItem.dropRate * avgCount * openedValuation.ask;
-            valuation.medianBid += openedItem.dropRate * avgCount * openedValuation.medianBid;
-            valuation.medianAsk += openedItem.dropRate * avgCount * openedValuation.medianAsk;
-        }
-        return valuation;
-    }
-
-    if (hrid === "/items/coin") return { ask: 1, bid: 1, medianAsk: 1, medianBid: 1 };
-    if (hrid === "/items/cowbell") {
-        const pack = getItemValuation("/items/bag_of_10_cowbells", marketJson, mwiObj);
-        return {
-            ask: pack.ask / 10,
-            bid: pack.bid / 10,
-            medianAsk: pack.medianAsk / 10,
-            medianBid: pack.medianBid / 10
-        };
-    }
-
-    return { bid: 0, ask: 0, medianBid: 0, medianAsk: 0 };
-}
-
-export function getDropTableInformation(dropTable, marketJson, mwiObj = null) {
-    const valuationResult = { ask: 0, bid: 0, medianAsk: 0, medianBid: 0 };
-    const dropItems = [];
-
-    for (const drop of dropTable) {
-        const valuation = getItemValuation(drop.itemHrid, marketJson, mwiObj);
-        const avgCount = (drop.minCount + drop.maxCount) / 2;
-        valuationResult.ask += valuation.ask * avgCount * drop.dropRate;
-        valuationResult.bid += valuation.bid * avgCount * drop.dropRate;
-        valuationResult.medianAsk += valuation.medianAsk * avgCount * drop.dropRate;
-        valuationResult.medianBid += valuation.medianBid * avgCount * drop.dropRate;
-
-        dropItems.push({
-            name: getItemName(drop.itemHrid),
-            ...valuation,
-            count: avgCount * drop.dropRate
-        });
-    }
-
-    return { ...valuationResult, dropItems };
 }

@@ -102,7 +102,8 @@ export function formatNumber(val) {
     else if (abs < 1e5) return Math.trunc(number);
     else if (abs < 1e6) return `${Number(Math.trunc(number / 100) / 10)}k`;
     else if (abs < 1e9) return `${Number(Math.trunc(number / 1e4) / 100)}M`;
-    else return `${Math.trunc(number / 1e9)}B`;
+    else if (abs < 1e12) return `${Number(Math.trunc(number / 1e7) / 100)}B`;
+    else return `${Math.trunc(number / 1e12)}T`;
 }
 
 export function getSign(val) {
@@ -1548,9 +1549,9 @@ export const ZHActionNames = {
 };
 
 export const processingCategory = {
-    "/action_types/cheesesmithing": "/action_categories/cheesesmithing/material",
-    "/action_types/crafting": "/action_categories/crafting/lumber",
-    "/action_types/tailoring": "/action_categories/tailoring/material",
+    "/action_types/cheesesmithing": ["/action_categories/cheesesmithing/material"],
+    "/action_types/crafting": ["/action_categories/crafting/lumber", "/action_categories/crafting/special"],
+    "/action_types/tailoring": ["/action_categories/tailoring/material"],
 };
 
 export const ZHActionTypeNames = {
@@ -1564,54 +1565,11 @@ export const ZHActionTypeNames = {
     brewing: "\u51b2\u6ce1",
 }
 
-// // 动作类型到房子名称映射
-// export const actionHridToHouseNamesMap = {
-//     "/action_types/brewing": "/house_rooms/brewery",
-//     "/action_types/cheesesmithing": "/house_rooms/forge",
-//     "/action_types/cooking": "/house_rooms/kitchen",
-//     "/action_types/crafting": "/house_rooms/workshop",
-//     "/action_types/foraging": "/house_rooms/garden",
-//     "/action_types/milking": "/house_rooms/dairy_barn",
-//     "/action_types/tailoring": "/house_rooms/sewing_parlor",
-//     "/action_types/woodcutting": "/house_rooms/log_shed",
-//     "/action_types/alchemy": "/house_rooms/laboratory",
-// };
-
-// // 物品强化等级到增益加成映射
-// export const itemEnhanceLevelToBuffBonusMap = {
-//     0: 0,
-//     1: 2,
-//     2: 4.2,
-//     3: 6.6,
-//     4: 9.2,
-//     5: 12.0,
-//     6: 15.0,
-//     7: 18.2,
-//     8: 21.6,
-//     9: 25.2,
-//     10: 29.0,
-//     11: 33.0,
-//     12: 37.2,
-//     13: 41.6,
-//     14: 46.2,
-//     15: 51.0,
-//     16: 56.0,
-//     17: 61.2,
-//     18: 66.6,
-//     19: 72.2,
-//     20: 78.0,
-// };
-
-// // 动作类型到工具速度增益名称映射
-// export const actionHridToToolsSpeedBuffNamesMap = {
-//     "/action_types/brewing": "brewingSpeed",
-//     "/action_types/cheesesmithing": "cheesesmithingSpeed",
-//     "/action_types/cooking": "cookingSpeed",
-//     "/action_types/crafting": "craftingSpeed",
-//     "/action_types/foraging": "foragingSpeed",
-//     "/action_types/milking": "milkingSpeed",
-//     "/action_types/tailoring": "tailoringSpeed",
-//     "/action_types/woodcutting": "woodcuttingSpeed",
-//     "/action_types/alchemy": "alchemySpeed",
-// };
-
+const OneSecond = 1000;
+const OneMinute = 60 * OneSecond;
+const OneHour = 60 * OneMinute;
+export const TimeSpan = {
+    TEN_SECONDS: 10 * OneSecond,
+    FIVE_MINUTES: 5 * OneMinute,
+    ONE_HOURS: OneHour,
+}

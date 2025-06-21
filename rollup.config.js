@@ -6,7 +6,7 @@ import fs from 'fs';
 let last = Date.now();
 const isDev = process.env.NODE_ENV === 'development';
 
-const version = "2025.06.18";
+const version = "2025.06.21";
 
 function updateBanner() {
     if (Date.now() - last > 1000) last = Date.now();
@@ -18,11 +18,15 @@ function updateBanner() {
 // @author       MengLan
 // @match        https://www.milkywayidle.com/*
 // @grant        GM_addStyle
-// @grant        GM.xmlHttpRequest
+// @grant        GM_getResourceText
 // @grant        GM_xmlhttpRequest
+// @grant        GM_setValue
+// @grant        GM_getValue
 // @connect      localhost
 // @connect      raw.githubusercontent.com
 // @connect      ghproxy.net
+// @require      https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js
+// @resource     bootstrapCSS  https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css
 // @downloadURL  http://localhost:8088/MWI-Profit-Panel.user.js
 // @updateURL    http://localhost:8088/MWI-Profit-Panel.meta.js
 // ==/UserScript==`
@@ -39,10 +43,14 @@ const prodBanner = `// ==UserScript==
 // @author       MengLan
 // @match        https://www.milkywayidle.com/*
 // @grant        GM_addStyle
-// @grant        GM.xmlHttpRequest
+// @grant        GM_getResourceText
 // @grant        GM_xmlhttpRequest
+// @grant        GM_setValue
+// @grant        GM_getValue
 // @connect      raw.githubusercontent.com
 // @connect      ghproxy.net
+// @require      https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js
+// @resource     bootstrapCSS  https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css
 // @downloadURL  https://update.greasyfork.cc/scripts/536724/MWI%20Profit%20Panel.user.js
 // @updateURL    https://update.greasyfork.cc/scripts/536724/MWI%20Profit%20Panel.meta.js
 // @license      MIT

@@ -65,7 +65,7 @@ export default function LostTrackerExpectEstimate() {
             // 生成显示元素
 
             const sign = getSign(excessProfit);
-            const content = `支出: ${formatNumber(outcome)} 预期收入: ${formatNumber(expectedIncome)} 实际收入: ${formatNumber(actualIncome)} (${sign}${Math.abs(excessPercent)}%) 盈利: ${formatNumber(profit)}`;
+            const content = `支出: ${formatNumber(outcome)} 收入: ${formatNumber(actualIncome)} 预期盈利：${formatNumber(expectedProfit)} 实现盈利: ${formatNumber(profit)} (${sign}${Math.abs(excessPercent)}%)`;
 
             const colorIntensity = Math.min(Math.abs(excessPercent) / 20, 1) * 0.3 + 0.7;
             const color = excessProfit >= 0

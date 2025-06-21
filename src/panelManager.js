@@ -1,6 +1,7 @@
 import globals from './globals.js';
 import { GenerateDom } from './domGenerator.js';
 import { createTooltip } from './tooltipManager.js';
+import { initSettingsPanel } from './settingsPanel.js';
 import { formatDuration, getMwiObj, getDuration, mooketStatus } from './utils.js';
 
 export async function waitForPannels() {
@@ -34,7 +35,16 @@ export async function waitForPannels() {
         newPanel.className = 'TabPanel_tabPanel__tXMJF TabPanel_hidden__26UM3 income-panel';
         newPanel.innerHTML = `
             <div class="Inventory_inventory__17CH2 profit-pannel">
-                <h3>生产收益详情</h3>
+            <h1 class="HousePanel_title__2fQ1U" style="position: relative; width: fit-content; margin: 4px auto 8px; font-size: 18px; font-weight: 600;">
+                <div>生产收益详情</div>
+                <div class="HousePanel_guideTooltipContainer__1lAt1" style="position: absolute; left: 100%; top: 0; margin-top: 1px; margin-left: 12px;">
+                    <div class="GuideTooltip_guideTooltip__1tVq-" id="profitSettingsBtn" style="cursor: pointer">
+                        <svg role="img" aria-label="Guide" class="Icon_icon__2LtL_" width="100%" height="100%">
+                            <use href="/static/media/misc_sprite.6b3198dc.svg#settings"></use>
+                        </svg>
+                    </div>
+                </div>
+            </h1>
                 <span style="color: green; font-size: 0.8em; margin-left: 10px;">数据更新于: ${formatDuration(Date.now() - globals.freshnessMarketJson.time * 1000)}</span>
                 <div class="Inventory_items__6SXv0 script_buildScore_added script_invSort_added">
                 ${GenerateDom(globals.freshnessMarketJson)}
@@ -48,7 +58,8 @@ export async function waitForPannels() {
         createTooltip();
         setupClickActions();
 
-        // Testing only
+        initSettingsPanel();
+
         setInterval(() => refreshProfitPanel(), 1000);
     });
 
@@ -88,7 +99,7 @@ function setupTabSwitching(newTabButton, newPanel, tabPanelsContainer, container
 
 function setupClickActions() {
     document.addEventListener('click', (e) => {
-        const itemContainer = e.target.closest('.Item_item__2De2O');
+        const itemContainer = e.target.closest('.Item_item__2De2O.Profit-pannel');
         if (!itemContainer) return;
 
         const tooltipData = itemContainer.dataset.tooltip;
@@ -113,7 +124,8 @@ export function refreshProfitPanel(force = false) {
     inventoryPanels.forEach(panel => {
         const timeSpan = panel.querySelector('span');
         if (timeSpan) {
-            timeSpan.textContent = `数据更新于：${getDuration(new Date(globals.freshnessMarketJson.time * 1000))}，收益刷新于：${getDuration(profitRefreshTime)}，mooket${mooketStatus()}，${getMwiObj()?.coreMarket ? "支持" : "不支持"}实时价格`;
+            timeSpan.textContent = globals.freshnessMarketJson.stat();
+            // timeSpan.textContent = `数据更新于：${getDuration(new Date(globals.freshnessMarketJson.time * 1000))}，收益刷新于：${getDuration(profitRefreshTime)}，mooket${mooketStatus()}，${getMwiObj()?.coreMarket ? "支持" : "不支持"}实时价格`;
         }
 
         if (force || globals.hasMarketItemUpdate) {

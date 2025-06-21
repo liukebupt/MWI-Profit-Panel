@@ -48,7 +48,7 @@ function setupTooltipEvents(tooltip, tooltipContent) {
     let tooltipTimer = null;
 
     document.addEventListener('mouseover', (e) => {
-        const itemContainer = e.target.closest('.Item_item__2De2O');
+        const itemContainer = e.target.closest('.Item_item__2De2O.Profit-pannel');
         if (!itemContainer) {
             tooltip.style.display = 'none';
             return;
@@ -76,7 +76,7 @@ function setupTooltipEvents(tooltip, tooltipContent) {
     });
 
     document.addEventListener('mouseout', (e) => {
-        if (!e.relatedTarget || !e.relatedTarget.closest('.Item_item__2De2O')) {
+        if (!e.relatedTarget || !e.relatedTarget.closest('.Item_item__2De2O.Profit-pannel')) {
             tooltipTimer = setTimeout(() => {
                 tooltip.style.display = 'none';
             }, 0);

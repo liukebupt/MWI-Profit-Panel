@@ -3,13 +3,14 @@ import {
     ZHActionTypeNames,
     processingCategory,
     getSvg,
+    formatNumber,
 } from "./utils";
 import ProfitCaculation from './profitCalculation'
 
 
 export function GenerateDom(marketJson) {
     if (!marketJson?.market) throw new Error("Market data unavailable");
-    const actionTypes = Object.keys(ZHActionTypeNames);
+    const actionTypes = globals.profitSettings.actionCategories;
     const actionTypesHtml = [];
     for (const actionType of actionTypes) {
         const actions = [];
@@ -17,7 +18,8 @@ export function GenerateDom(marketJson) {
         const actionsHtmlResult = []
         for (const action of actions) {
             if (processingCategory[action.type]) {
-                if (action?.category && action.category !== processingCategory[action.type]) continue;
+                const categorys = processingCategory[action.type];
+                if (action?.category && categorys.indexOf(action.category) === -1) continue;
             }
             const levelEngouth = globals.initCharacterData_characterSkills.some(skill => skill.skillHrid === action.levelRequirement.skillHrid && skill.level >= action.levelRequirement.level);
             const iconId = action.hrid.replace(`/actions/${actionType}/`, '');
@@ -27,13 +29,13 @@ export function GenerateDom(marketJson) {
                 `
                 <div class="Item_itemContainer__x7kH1" style="position: relative;">
                     <div>
-                        <div class="Item_item__2De2O Item_clickable__3viV6" style="${levelEngouth ? "" : "background-color: var(--color-midnight-800);"}" data-tooltip='${JSON.stringify(result)}'>
+                        <div class="Item_item__2De2O Item_clickable__3viV6 Profit-pannel" style="${levelEngouth ? "" : "background-color: var(--color-midnight-800);"}" data-tooltip='${JSON.stringify(result)}'>
                             <div class="Item_iconContainer__5z7j4"><svg role="img" aria-label="${action.name}"
                                     class="Icon_icon__2LtL_" width="100%" height="100%">
                                     <use href="/static/media/${getSvg(iconId)}"></use>
                                 </svg></div>
                             
-                            <div id="script_stack_price" style="z-index: 1; position: absolute; top: 2px; left: 2px; text-align: left;">${result.profitPerDayMillion}M</div>
+                            <div id="script_stack_price" style="z-index: 1; position: absolute; top: 2px; left: 2px; text-align: left;">${formatNumber(result.profitPerDay)}</div>
                             <div class="Item_count__1HVvv">${result.ProfitMargin.toFixed(0)}%</div>
                         </div>
                     </div>

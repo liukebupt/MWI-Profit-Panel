@@ -11,26 +11,26 @@ export default function ProfitCaculation(action, marketJson) {
     const isProduction = action.inputItems?.length > 0;
     const actionHrid = action.hrid;
 
+    const buyMode = globals.profitSettings.materialPriceMode;
+    const sellMode = globals.profitSettings.productPriceMode;
+
     // 茶(饮品)效率和支出计算
     const teaBuffs = buffs.getTeaBuffs(action.type);
-    let drinksConsumedPerHourAskPrice = 0;
-    let drinksConsumedPerHourBidPrice = 0;
+    const drinksConsumedHourAskPrice = { ask: 0, bid: 0 };
     const drinksList = globals.initCharacterData_actionTypeDrinkSlotsMap[action.type];
     const drinkItems = [];
     for (const drink of drinksList) {
         if (!drink?.itemHrid) continue;
         const valuation = getItemValuation(drink.itemHrid, marketJson);
-        drinksConsumedPerHourAskPrice += (valuation?.ask ?? 0) * 12;
-        drinksConsumedPerHourBidPrice += (valuation?.bid ?? 0) * 12;
+        drinksConsumedHourAskPrice.ask += (valuation?.ask ?? 0) * 12;
+        drinksConsumedHourAskPrice.bid += (valuation?.bid ?? 0) * 12;
         drinkItems.push({ ...valuation, name: getItemName(drink.itemHrid), countPerHour: 12 });
     }
     const communityBuff = buffs.getCommunityBuff(action.type);
 
     // 原料支出计算
     let inputItems = [];
-    let totalResourcesAskPricePerAction = 0;
-    let totalResourcesBidPricePerAction = 0;
-    let upgradedItem = null;
+    const totalResourcesPricePerAction = { ask: 0, bid: 0 }
 
     if (isProduction) {
         inputItems = JSON.parse(JSON.stringify(action.inputItems));
@@ -39,18 +39,16 @@ export default function ProfitCaculation(action, marketJson) {
             Object.assign(item, getItemValuation(item.itemHrid, marketJson));
             // 茶减少原料消耗
             item.count *= 1 - teaBuffs.artisan / 100;
-            totalResourcesAskPricePerAction += item.ask * item.count;
-            totalResourcesBidPricePerAction += item.bid * item.count;
+            totalResourcesPricePerAction.ask += item.ask * item.count;
+            totalResourcesPricePerAction.bid += item.bid * item.count;
         }
 
         // 上级物品作为原料
         if (action.upgradeItemHrid) {
             const valuation = getItemValuation(action.upgradeItemHrid, marketJson);
-            const upgradedFromItemAsk = valuation?.ask;
-            const upgradedFromItemBid = valuation?.bid;
-            totalResourcesAskPricePerAction += upgradedFromItemAsk;
-            totalResourcesBidPricePerAction += upgradedFromItemBid;
-            upgradedItem = {
+            totalResourcesPricePerAction.ask += valuation?.ask;
+            totalResourcesPricePerAction.bid += valuation?.bid;
+            const upgradedItem = {
                 name: getItemName(action.upgradeItemHrid),
                 ...valuation,
                 count: 1,
@@ -82,7 +80,7 @@ export default function ProfitCaculation(action, marketJson) {
     const actionPerHour = 3600 / actualTimePerActionSec * (1 + totalEffBuff / 100);
 
     // 每小时支出
-    const expendPerHour = totalResourcesAskPricePerAction * actionPerHour + drinksConsumedPerHourAskPrice;
+    const expendPerHour = totalResourcesPricePerAction[buyMode] * actionPerHour + drinksConsumedHourAskPrice[buyMode];
 
     const outputItems = [];
     // 基础产出
@@ -140,8 +138,8 @@ export default function ProfitCaculation(action, marketJson) {
     outputItems.forEach(item => item.countPerHour = item.count * actionPerHour);
 
     // 每小时利润
-    const profitPerHour = outputPerHour.bid - expendPerHour;
-    const profitPerDayMillion = (profitPerHour * 24 / 1e6).toFixed(2);
+    const profitPerHour = outputPerHour[sellMode] - expendPerHour;
+    const profitPerDay = profitPerHour * 24;
 
     return {
         actionNames: getActionName(action.hrid),
@@ -160,7 +158,7 @@ export default function ProfitCaculation(action, marketJson) {
         houseBuff,
         equipmentBuff,
 
-        profitPerDayMillion,
-        ProfitMargin: 100 * (outputPerHour.bid - expendPerHour) / expendPerHour
+        profitPerDay,
+        ProfitMargin: 100 * (profitPerHour) / expendPerHour
     };
 }

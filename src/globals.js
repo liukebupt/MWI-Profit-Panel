@@ -18,7 +18,9 @@ class GlobalState {
             freshnessMarketJson: {},
             medianMarketJson: {},
             processingMap: {},
+            en2ZhMap: {},
             lootLog: [],
+            profitSettings: {}
         };
 
         this._listeners = new Set();
