@@ -11,8 +11,8 @@ export default function ProfitCaculation(action, marketJson) {
     const isProduction = action.inputItems?.length > 0;
     const actionHrid = action.hrid;
 
-    const buyMode = globals.profitSettings.materialPriceMode;
-    const sellMode = globals.profitSettings.productPriceMode;
+    const buyMode = globals.profitSettings.materialPriceMode || 'bid';
+    const sellMode = globals.profitSettings.productPriceMode || 'ask';
 
     // 茶(饮品)效率和支出计算
     const teaBuffs = buffs.getTeaBuffs(action.type);

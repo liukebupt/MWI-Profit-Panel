@@ -10,25 +10,11 @@ export function getActionName(actionHrid) {
     else return globals.initClientData_actionDetailMap[actionHrid].name;
 }
 
-export function mergeMooket(hrid, valuation, marketJson) {
-    if (getMwiObj()?.coreMarket) {
-        const hridWithLevel = `${hrid}:0`;
-        const mooketVal = getMwiObj()?.coreMarket.marketData[hridWithLevel];
-        if (mooketVal && mooketVal?.time > marketJson.time) {
-            valuation.bid = mooketVal.bid;
-            valuation.ask = mooketVal.ask;
-        }
-    }
-    else console.log(`mergeMooket failed ${window}`);
-    return valuation;
-}
-
 export function getItemValuation(hrid, marketJson) {
     const item = globals.initClientData_itemDetailMap[hrid];
     if (!item) { console.log(`${hrid} can't found the item detail`); return { bid: 0, ask: 0 }; }
     if (item?.isTradable) {
-        let ret = marketJson.market[item.name];
-        ret = mergeMooket(hrid, ret, marketJson);
+        const ret = { ...marketJson.market[item.name] };
         if (ret.bid == -1 && ret.ask == -1) ret.ask = ret.bid = 1e9;
         else if (ret.bid == -1 || ret.ask == -1) ret.ask = ret.bid = Math.max(ret.ask, ret.bid);
         if (globals.medianMarketJson?.market) {

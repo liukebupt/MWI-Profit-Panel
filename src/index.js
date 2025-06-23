@@ -3,6 +3,7 @@ import { preFetchData } from './marketService';
 import { waitForPannels, refreshProfitPanel } from './panelManager'
 import { processingCategory, ZHitemNames } from './utils';
 import LostTrackerExpectEstimate from './LostTrackerExpectEstimate'
+import { validateProfitSettings } from './settingsPanel';
 
 function hookWS() {
     const dataProperty = Object.getOwnPropertyDescriptor(MessageEvent.prototype, "data");
@@ -118,16 +119,15 @@ globals.subscribe((key, value) => {
     }
 });
 
-const profitSettings = JSON.parse(GM_getValue('profitSettings', JSON.stringify({
+const profitSettings = validateProfitSettings(JSON.parse(GM_getValue('profitSettings', JSON.stringify({
     materialPriceMode: 'ask',
     productPriceMode: 'bid',
-    refreshInterval: 10 * 60 * 1000,
+    refreshInterval: 30 * 60 * 1000,
     actionCategories: ['milking', 'foraging', 'woodcutting', 'cheesesmithing', 'crafting', 'tailoring', 'cooking', 'brewing']
-})));
+}))));
 globals.profitSettings = profitSettings;
 
 globals.isZHInGameSetting = localStorage.getItem("i18nextLng")?.toLowerCase()?.startsWith("zh"); // 获取游戏内设置语言
-
 
 if (localStorage.getItem("initClientData")) {
     const obj = JSON.parse(localStorage.getItem("initClientData"));
