@@ -82,14 +82,6 @@ function handleMessage(message) {
                 globals.initCharacterData_houseActionTypeBuffsMap = obj.houseActionTypeBuffsMap;
                 refreshProfitPanel(true);
             }
-            else if (obj.type === "") { }
-            else if (obj.type === "") { }
-            else if (obj.type === "") { }
-            else if (obj.type === "") { }
-            else if (obj.type === "") { }
-            else if (obj.type === "") { }
-            else if (obj.type === "") { }
-            else if (obj.type === "") { }
         }
     }
     catch (err) { console.error(err); }
@@ -122,7 +114,7 @@ globals.subscribe((key, value) => {
 const profitSettings = validateProfitSettings(JSON.parse(GM_getValue('profitSettings', JSON.stringify({
     materialPriceMode: 'ask',
     productPriceMode: 'bid',
-    refreshInterval: 30 * 60 * 1000,
+    dataSourceKeys: ['MwiApi', 'Official', 'MooketApi', 'Mooket'],
     actionCategories: ['milking', 'foraging', 'woodcutting', 'cheesesmithing', 'crafting', 'tailoring', 'cooking', 'brewing']
 }))));
 globals.profitSettings = profitSettings;
@@ -139,5 +131,6 @@ if (localStorage.getItem("initClientData")) {
 
 hookWS();
 preFetchData();
-// addEventListener('MWICoreItemPriceUpdated', () => { globals.hasMarketItemUpdate = true; });
 GM_addStyle(GM_getResourceText("bootstrapCSS"));
+
+window["MWIProfitPanel_Globals"] = globals;

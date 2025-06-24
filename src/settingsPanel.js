@@ -60,19 +60,23 @@ const modalHTML = `
                                 </div>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">Mooket数据主动刷新频率 (分钟)</label>
-                                <select class="form-select" id="refreshInterval">
-                                    <option value="30">30分钟</option>
-                                    <option value="40">40分钟</option>
-                                    <option value="50">50分钟</option>
-                                    <option value="60">60分钟</option>
-                                    <option value="70">70分钟</option>
-                                    <option value="80">80分钟</option>
-                                    <option value="90">90分钟</option>
-                                    <option value="100">100分钟</option>
-                                    <option value="110">110分钟</option>
-                                    <option value="120">120分钟</option>
-                                </select>
+                                <label class="form-label">数据来源 (暂时不生效)</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="mwiApiCheck" value="MwiApi">
+                                    <label class="form-check-label" for="mwiApiCheck">MWI API</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="officialCheck" value="Official">
+                                    <label class="form-check-label" for="officialCheck">官方市场</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="mooketApiCheck" value="MooketApi">
+                                    <label class="form-check-label" for="mooketApiCheck">Mooket API</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="mooketCheck" value="Mooket">
+                                    <label class="form-check-label" for="mooketCheck">Mooket实时</label>
+                                </div>
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -86,6 +90,7 @@ const modalHTML = `
 
 export function validateProfitSettings(settings) {
     const validCategories = ['milking', 'foraging', 'woodcutting', 'cheesesmithing', 'crafting', 'tailoring', 'cooking', 'brewing'];
+    const validDataSources = ['MwiApi', 'Official', 'MooketApi', 'Mooket'];
 
     // 验证price modes
     if (!['ask', 'bid'].includes(settings.materialPriceMode)) {
@@ -95,9 +100,14 @@ export function validateProfitSettings(settings) {
         settings.productPriceMode = 'bid';
     }
 
-    // 验证refreshInterval
-    if (typeof settings.refreshInterval !== 'number' || settings.refreshInterval < 1800000 || settings.refreshInterval > 7200000) {
-        settings.refreshInterval = 30 * 60 * 1000;
+    // 验证dataSourceKeys
+    if (!Array.isArray(settings.dataSourceKeys)) {
+        settings.dataSourceKeys = validDataSources;
+    } else {
+        settings.dataSourceKeys = settings.dataSourceKeys.filter(src => validDataSources.includes(src));
+        if (settings.dataSourceKeys.length === 0) {
+            settings.dataSourceKeys = validDataSources;
+        }
     }
 
     // 验证actionCategories
@@ -132,13 +142,16 @@ export function initSettingsPanel() {
 
             // 保存设置事件
             document.getElementById('saveSettingsBtn').addEventListener('click', () => {
-                const actionCategories = Array.from(document.querySelectorAll('input[type="checkbox"][value]:checked'))
+                const actionCategories = Array.from(document.querySelectorAll('#profitSettingsModal div:nth-child(3) input[type="checkbox"][value]:checked'))
+                    .map(checkbox => checkbox.value);
+
+                const dataSourceKeys = Array.from(document.querySelectorAll('#profitSettingsModal div:nth-child(4) input[type="checkbox"][value]:checked'))
                     .map(checkbox => checkbox.value);
 
                 const settings = {
                     materialPriceMode: document.getElementById('materialPriceMode').value,
                     productPriceMode: document.getElementById('productPriceMode').value,
-                    refreshInterval: parseInt(document.getElementById('refreshInterval').value) * 60 * 1000,
+                    dataSourceKeys: dataSourceKeys,
                     actionCategories: actionCategories
                 };
                 globals.profitSettings = validateProfitSettings(settings);
@@ -150,10 +163,22 @@ export function initSettingsPanel() {
             const settings = globals.profitSettings;
             document.getElementById('materialPriceMode').value = settings.materialPriceMode;
             document.getElementById('productPriceMode').value = settings.productPriceMode;
-            document.getElementById('refreshInterval').value = settings.refreshInterval / (60 * 1000) || 10;
+            // 设置默认数据来源选项
+            const dataSourceCheckboxes = document.querySelectorAll('#profitSettingsModal div:nth-child(4) input[type="checkbox"][value]');
+            if (settings.dataSourceKeys) {
+                dataSourceCheckboxes.forEach(checkbox => {
+                    checkbox.checked = settings.dataSourceKeys.includes(checkbox.value);
+                });
+            }
+            else {
+                // 默认全选
+                dataSourceCheckboxes.forEach(checkbox => {
+                    checkbox.checked = true;
+                });
+            }
 
             // 设置默认分类选项
-            const checkboxes = document.querySelectorAll('input[type="checkbox"][value]');
+            const checkboxes = document.querySelectorAll('#profitSettingsModal div:nth-child(3) input[type="checkbox"][value]');
             if (settings.actionCategories) {
                 checkboxes.forEach(checkbox => {
                     checkbox.checked = settings.actionCategories.includes(checkbox.value);

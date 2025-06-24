@@ -1557,5 +1557,7 @@ const OneHour = 60 * OneMinute;
 export const TimeSpan = {
     TEN_SECONDS: 10 * OneSecond,
     FIVE_MINUTES: 5 * OneMinute,
+    HALF_HOURS: 30 * OneMinute,
     ONE_HOURS: OneHour,
+    FOUR_HOURS: 4 * OneHour,
 }
