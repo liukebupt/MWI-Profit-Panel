@@ -4,6 +4,53 @@ import { createTooltip } from './tooltipManager.js';
 import { initSettingsPanel } from './settingsPanel.js';
 import { formatDuration, getMwiObj, getDuration, mooketStatus } from './utils.js';
 
+// 获取当前交易模式的标识
+function getCurrentTradingMode() {
+    const settings = globals.profitSettings;
+    return `${settings.materialPriceMode}-${settings.productPriceMode}`;
+}
+
+// 设置交易模式
+function setTradingMode(materialMode, productMode) {
+    const settings = globals.profitSettings;
+    globals.profitSettings = {
+        ...settings,
+        materialPriceMode: materialMode,
+        productPriceMode: productMode
+    };
+}
+
+// 生成交易模式按钮组HTML
+function generateTradingModeButtons() {
+    const currentMode = getCurrentTradingMode();
+    const modes = [
+        { key: 'ask-bid', label: '高买低卖', material: 'ask', product: 'bid' },
+        { key: 'ask-ask', label: '高买高卖', material: 'ask', product: 'ask' },
+        { key: 'bid-ask', label: '低买高卖', material: 'bid', product: 'ask' },
+        { key: 'bid-bid', label: '低买低卖', material: 'bid', product: 'bid' }
+    ];
+
+    return modes.map(mode => `
+        <label class="trading-mode-option" style="
+            display: flex; 
+            align-items: center; 
+            margin-right: 6px; 
+            padding: 3px 6px; 
+            cursor: pointer; 
+            font-size: 0.72em;
+            border-radius: 3px;
+            background: ${currentMode === mode.key ? '#007bff' : '#f8f9fa'};
+            color: ${currentMode === mode.key ? 'white' : '#333'};
+            border: 1px solid ${currentMode === mode.key ? '#007bff' : '#dee2e6'};
+            transition: all 0.2s ease;
+        ">
+            <input type="radio" name="tradingMode" value="${mode.key}" ${currentMode === mode.key ? 'checked' : ''} 
+                   style="display: none;" data-material="${mode.material}" data-product="${mode.product}">
+            <span style="white-space: nowrap;">${mode.label}</span>
+        </label>
+    `).join('');
+}
+
 export async function waitForPannels() {
     if (!globals.freshnessMarketJson?.market) {
         setTimeout(waitForPannels, 1000);
@@ -45,7 +92,12 @@ export async function waitForPannels() {
                     </div>
                 </div>
             </h1>
-                <span style="color: green; font-size: 0.8em; margin-left: 10px;">数据更新于: ${formatDuration(Date.now() - globals.freshnessMarketJson.time * 1000)}</span>
+                <div style="display: flex; align-items: center; justify-content: space-between; margin: 0 10px 8px; flex-wrap: wrap;">
+                    <span style="color: green; font-size: 0.8em; margin-bottom: 4px;">数据更新于: ${formatDuration(Date.now() - globals.freshnessMarketJson.time * 1000)}</span>
+                    <div id="tradingModeContainer" style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+                        ${generateTradingModeButtons()}
+                    </div>
+                </div>
                 <div class="Inventory_items__6SXv0 script_buildScore_added script_invSort_added">
                 ${GenerateDom(globals.freshnessMarketJson)}
                 </div>
@@ -99,6 +151,29 @@ function setupTabSwitching(newTabButton, newPanel, tabPanelsContainer, container
 
 function setupClickActions() {
     document.addEventListener('click', (e) => {
+        // 处理交易模式按钮点击 (包括label和radio)
+        const tradingModeLabel = e.target.closest('.trading-mode-option');
+        if (tradingModeLabel) {
+            const radio = tradingModeLabel.querySelector('input[type="radio"]');
+            if (radio) {
+                const materialMode = radio.dataset.material;
+                const productMode = radio.dataset.product;
+                setTradingMode(materialMode, productMode);
+                refreshProfitPanel(true);
+
+                // 更新所有按钮的样式
+                document.querySelectorAll('.trading-mode-option').forEach(label => {
+                    const labelRadio = label.querySelector('input[type="radio"]');
+                    const isSelected = labelRadio === radio;
+                    label.style.background = isSelected ? '#007bff' : '#f8f9fa';
+                    label.style.color = isSelected ? 'white' : '#333';
+                    label.style.borderColor = isSelected ? '#007bff' : '#dee2e6';
+                    labelRadio.checked = isSelected;
+                });
+            }
+            return;
+        }
+
         const itemContainer = e.target.closest('.Item_item__2De2O.Profit-pannel');
         if (!itemContainer) return;
 
@@ -126,6 +201,21 @@ export function refreshProfitPanel(force = false) {
         if (timeSpan) {
             timeSpan.textContent = globals.freshnessMarketJson.stat();
             // timeSpan.textContent = `数据更新于：${getDuration(new Date(globals.freshnessMarketJson.time * 1000))}，收益刷新于：${getDuration(profitRefreshTime)}，mooket${mooketStatus()}，${getMwiObj()?.coreMarket ? "支持" : "不支持"}实时价格`;
+        }
+
+        // 更新交易模式按钮状态
+        const tradingModeContainer = panel.querySelector('#tradingModeContainer');
+        if (tradingModeContainer) {
+            const currentMode = getCurrentTradingMode();
+            const labels = tradingModeContainer.querySelectorAll('.trading-mode-option');
+            labels.forEach(label => {
+                const radio = label.querySelector('input[type="radio"]');
+                const isSelected = radio.value === currentMode;
+                label.style.background = isSelected ? '#007bff' : '#f8f9fa';
+                label.style.color = isSelected ? 'white' : '#333';
+                label.style.borderColor = isSelected ? '#007bff' : '#dee2e6';
+                radio.checked = isSelected;
+            });
         }
 
         if (force || globals.hasMarketItemUpdate) {
