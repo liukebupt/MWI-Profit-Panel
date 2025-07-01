@@ -6,7 +6,7 @@ import fs from 'fs';
 let last = Date.now();
 const isDev = process.env.NODE_ENV === 'development';
 
-const version = "2025.06.24";
+const version = "2025.07.01";
 
 function updateBanner() {
     if (Date.now() - last > 1000) last = Date.now();
@@ -61,7 +61,7 @@ const prodBanner = `// ==UserScript==
 export default {
     input: 'src/index.js',
     output: {
-        file: 'dist/MWI-Profit-Panel.user.js',
+        file: isDev ? 'dist/MWI-Profit-Panel-Dev.user.js' : 'dist/MWI-Profit-Panel.user.js',
         format: 'iife',
         banner: () => isDev ? updateBanner() : prodBanner,
     },

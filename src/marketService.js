@@ -359,7 +359,7 @@ class UnifyMarketData {
 
     mergeFromCache() {
         const cacheMarket = JSON.parse(GM_getValue('UnifyMarketData', '{}'));
-        for (const [name, item] of Object.entries(this.market)) {
+        for (const [name, item] of Object.entries(this.market)) if (cacheMarket[name]) {
             const { ask, bid, src, time } = cacheMarket[name];
             if (DataSourceKey[src]) {
                 Object.assign(item, { ask, bid, src, time });
