@@ -61,7 +61,7 @@ export async function waitForPannels() {
     const leftPanelContainers = document.querySelectorAll("div.GamePage_middlePanel__ubts7 .MuiTabs-root");
     const targetNodes = [...rightPanelContainers, ...leftPanelContainers];
     targetNodes.forEach(container => {
-        if (container.dataset.processed) return;
+        if (container.querySelector('.MuiButtonBase-root.MuiTab-root.MuiTab-textColorPrimary.css-1q2h7u5.income-tab')) return;
 
         // 添加标签按钮和面板容器
         const tabsContainer = container.querySelector('div.MuiTabs-flexContainer');
@@ -115,11 +115,7 @@ export async function waitForPannels() {
         setInterval(() => refreshProfitPanel(), 1000);
     });
 
-    // Check if income panel is missing
-    const panelsExist = document.querySelectorAll(".income-panel").length >= 2;
-    if (!panelsExist) {
-        setTimeout(waitForPannels, 1000);
-    }
+    setTimeout(waitForPannels, 1000);
 }
 
 function setupTabSwitching(newTabButton, newPanel, tabPanelsContainer, container) {

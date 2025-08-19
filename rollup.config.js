@@ -28,11 +28,11 @@ function updateBanner() {
 // @connect      mooket.qi-e.top
 // @require      https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js
 // @resource     bootstrapCSS  https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css
-// @downloadURL  http://localhost:8088/MWI-Profit-Panel.user.js
-// @updateURL    http://localhost:8088/MWI-Profit-Panel.meta.js
+// @downloadURL  http://localhost:8088/MWI-Profit-Panel-Dev.user.js
+// @updateURL    http://localhost:8088/MWI-Profit-Panel-Dev.meta.js
 // ==/UserScript==`
 
-    fs.writeFileSync('dist/MWI-Profit-Panel.meta.js', banner);
+    fs.writeFileSync('dist/MWI-Profit-Panel-Dev.meta.js', banner);
     return banner;
 }
 
@@ -53,8 +53,6 @@ const prodBanner = `// ==UserScript==
 // @connect      mooket.qi-e.top
 // @require      https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js
 // @resource     bootstrapCSS  https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css
-// @downloadURL  https://update.greasyfork.cc/scripts/536724/MWI%20Profit%20Panel.user.js
-// @updateURL    https://update.greasyfork.cc/scripts/536724/MWI%20Profit%20Panel.meta.js
 // @license      MIT
 // ==/UserScript==`;
 
