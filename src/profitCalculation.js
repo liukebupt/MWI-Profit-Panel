@@ -118,7 +118,7 @@ export default function ProfitCaculation(action, marketJson) {
     // 稀有掉落
     const rareOutputValuationPerAction = Array.isArray(action?.rareDropTable) ? getDropTableInfomation(action.rareDropTable, marketJson) : { ask: 0, bid: 0 };
     if (rareOutputValuationPerAction.dropItems) {
-        const quantityBuf = (100 + houseBuff.rare_find) / 100;
+        const quantityBuf = (100 + houseBuff.rare_find + equipmentBuff.rare_find) / 100;
         rareOutputValuationPerAction.ask *= quantityBuf;
         rareOutputValuationPerAction.bid *= quantityBuf;
         rareOutputValuationPerAction.dropItems.forEach(item => item.count *= quantityBuf);
